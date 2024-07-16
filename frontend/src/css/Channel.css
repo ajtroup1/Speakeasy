@@ -1,0 +1,89 @@
+.channel-main {
+  /* background-color: red; */
+  height: 89vh;
+  position: relative;
+  overflow-y: hidden;
+}
+
+.messaging-container {
+  position: absolute;
+  bottom: 2%;
+  width: 80%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background-color: #2f3136; /* Discord-like background color */
+  padding: 8px;
+  border-top: 1px solid #40444b; /* Discord-like border */
+  border-radius: 30px;
+}
+
+.message-input {
+  flex: 1; /* Take up remaining space */
+  min-height: 50px; /* Minimum height */
+  background-color: #40444b; /* Input background color */
+  color: #ffffff; /* Text color */
+  border: none;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 4px;
+  resize: none; /* Prevent resizing */
+}
+
+.send-button {
+  /* background-color: #7289da; */
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  margin-left: 8px;
+  cursor: pointer;
+  width: 5%;
+  height: auto;
+
+  transition: transform 0.2s ease-in-out;
+}
+
+.send-button:hover {
+  transform: scale(1.1);
+}
+
+.send-button:active {
+  transform: scale(1.2);
+}
+
+.attachment-icon {
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  width: 4%;
+  height: auto;
+
+  transition: transform 0.2s ease-in-out;
+  margin: 0;
+  padding: 0;
+  margin-right: 10px;
+  margin-left: 5px;
+}
+
+.attachment-icon:hover {
+  transform: scale(1.1);
+}
+
+.attachment-icon:active {
+  transform: scale(1.2);
+}
+
+.channel-content-main {
+  background-color: red;
+  height: 70vh;
+  margin-top: 1%;
+  width: 90%;
+  left: 50%;
+  transform: translateX(-50%);
+  position: absolute;
+  background-color: #2f3136;
+  opacity: 0.95;
+  border-radius: 30px;
+}

@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import "../../css/Home.css";
 import ChannelsList from "./ChannelsList"
 import Navbar from "./Navbar";
+import Channel from "../Channel/Channel";
 
 function Home() {
 
@@ -16,6 +18,11 @@ function Home() {
           src="../../src/assets/speakeasy-logo.webp"
           className="right-home-background-img"
         />
+        <div className="right-home-content">
+          <Routes>
+            <Route path="/channelname" element={<Channel />} />
+          </Routes>
+        </div>
       </div>
     </div>
   );
