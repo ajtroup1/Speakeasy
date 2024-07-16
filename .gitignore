@@ -1,1 +1,6 @@
+# Ignore backend environment configuration
 config/vars.env
+
+# Ignore system files
+.vscode/
+.idea/
