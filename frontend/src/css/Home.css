@@ -1,0 +1,99 @@
+.home-main {
+  width: 100%;
+  background-color: rgb(52, 52, 52);
+  height: 102vh;
+  display: flex;
+  background-image: url("https://pixelsharing.wordpress.com/wp-content/uploads/2010/11/gothic-background-tileable-and-seamless-pattern.jpg");
+  background-repeat: repeat;
+}
+
+.left-home-main {
+  height: 100%;
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(52, 52, 52);
+}
+
+.right-home-main {
+  height: 100%;
+  width: 90%;
+}
+
+.channels-main {
+  width: 100%;
+  height: 95%;
+  display: flex;
+  flex-wrap: wrap; /* Ensure items wrap to the next line if necessary */
+  align-items: center;
+  justify-content: center; /* Center items horizontally */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds height */
+}
+
+.channel-container {
+  background-color: red;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-top: 20%;
+  transition: transform 0.3s ease-in-out; /* Add transition for smooth scaling */
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.channel-container:hover {
+  transform: scale(1.1); /* Scale up to 110% on hover */
+}
+
+.channel-container p {
+  margin-top: 5px; /* Adjust spacing between name and circle */
+}
+
+.right-home-background-img {
+  display: block;
+  margin: auto; /* Center the image horizontally */
+  position: relative; /* Ensure relative positioning for stacking context */
+  z-index: 0; /* Ensure the image is at the base layer */
+  opacity: 0.3;
+}
+
+.navbar-main {
+  width: 100%;
+  background-color: red;
+  height: 12.5%;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar-title-container {
+  background-color: blue;
+  height: 100%;
+  width: 30%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navbar-title-container p {
+  font-size: xxx-large;
+  font-family: "Times New Roman", serif;
+  font-style: italic;
+  color: #ffffff;
+  transform: skewY(-4deg) translateY(-50%);
+  position: relative;
+  top: 50%;
+  margin-top: 10%;
+  margin-right: -25px;
+}
+
+.nav-hat-icon {
+  width: 50px;
+  height: auto;
+  padding-bottom: 20px;
+  rotate: 50deg;
+}
