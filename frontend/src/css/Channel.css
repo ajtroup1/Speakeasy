@@ -86,4 +86,91 @@
   background-color: #2f3136;
   opacity: 0.95;
   border-radius: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inner-channel-content {
+  width: 95%;
+  height: 90%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.indiv-message-channel-container {
+  min-width: 300px;
+  max-width: 700px;
+  min-height: 100px;
+  max-height: 300px;
+  background-color: #4c4f56;
+  border-radius: 30px;
+  padding-bottom: 1%;
+  margin-bottom: 1%;
+}
+
+.my-indiv-message-channel-container {
+  min-width: 300px;
+  max-width: 700px;
+  min-height: 100px;
+  max-height: 300px;
+  background-color: #4c4f56;
+  border-radius: 30px;
+  padding-bottom: 1%;
+  margin-bottom: 1%;
+  transform: translateX(62.5%);
+}
+
+.channel-upper-msg-container {
+  display: flex;
+  width: 100%;
+  height: 20%;
+  /* background-color: red; */
+  align-items: center;
+  justify-content: space-evenly;
+  padding-top: 10px;
+  position: relative;
+  padding-top: 4.5%;
+}
+
+.channel-msg-profile-img-container {
+  height: 75px;
+  width: 75px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: absolute;
+  left: 3%;
+}
+
+.channel-msg-profile-img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover; /* Ensures the image covers the container */
+  border-radius: 50%;
+}
+
+
+.channel-msg-content {
+  margin-top: 50px;
+  width: 85%;
+  /* background-color: red; */
+  margin: 0 auto;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4%;
+  font-size: 1.25rem;
+}
+
+.msg-createdat {
+    position: absolute;
+    right: 5%;
+}
+
+.channel-msg-username {
+    font-weight: bold;
+}
+
+.channel-msg-username-container {
+    position: absolute;
+    left: 16%;
 }
