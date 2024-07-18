@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS channels (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `description` TEXT NOT NULL,
+  `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `createdBy` INT UNSIGNED NOT NULL,
+  `imgLink` VARCHAR(255) NOT NULL,
+  
+  PRIMARY KEY (id),
+  FOREIGN KEY (createdBy) REFERENCES users(id) ON DELETE CASCADE,
+  
+  INDEX idx_createdBy (createdBy)
+);
