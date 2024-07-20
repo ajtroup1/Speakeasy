@@ -64,10 +64,23 @@ func (s *Store) CreateUser(user types.User) error {
 	firstname := capitalizeFirstLetter(user.Firstname)
 	lastname := capitalizeFirstLetter(user.Lastname)
 
-	_, err := s.db.Exec("INSERT INTO users (username, password, firstname, lastname, email, phonenum, imglink, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+	_, err := s.db.Exec("INSERT INTO users (username, password, firstname, lastname, email, phoneNumber, imglink, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		user.Username, user.Password, firstname, lastname, user.Email, user.PhoneNumber, user.ImgLink, user.Status, user.CreatedAt)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (s *Store) EditUser(user types.User) error {
+	firstname := capitalizeFirstLetter(user.Firstname)
+	lastname := capitalizeFirstLetter(user.Lastname)
+
+	_, err := s.db.Exec("UPDATE users SET username = ?, firstname = ?, lastname = ?, email = ?, phoneNumber = ?, imgLink = ? WHERE id = ?",
+		user.Username, firstname, lastname, user.Email, user.PhoneNumber, user.ImgLink, user.ID)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
 	}
 
 	return nil

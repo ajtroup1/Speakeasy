@@ -21,6 +21,21 @@ type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(id int) (*User, error)
 	CreateUser(User) error
+	EditUser(User) error
+}
+
+type FriendStore interface {
+	FriendUser(sendID, receiveID uint) error
+	UnfriendUser (sendID, receiveID uint) error
+}
+
+type MessageStore interface {
+	CreateMessage(Message) error
+}
+
+type ChannelStore interface {
+	// GetChannelByID(id int) error
+	CreateChannel(Channel) error
 }
 
 type RegisterUserPayload struct {
@@ -38,17 +53,37 @@ type LoginUserPayload struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type FriendPayload struct {
+    SendID    uint `json:"sendID" validate:"required,gt=0"`
+    ReceiveID uint `json:"receiveID" validate:"required,gt=0,nefield=SendID"`
+}
+
 type Message struct {
+	ID        int       `json:"id"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"createdAt"`
 	CreatedBy int       `json:"createdBy"` // user ID
-	ChannelID int       `json:"channelId"` // channel ID
+	ChannelD  int       `json:"channeId"`  // channel ID
+}
+
+type CreateMessagePayload struct {
+	Content   string `json:"content" validate:"required,min=1"`
+	CreatedBy int    `json:"createdBy" validate:"required"` // user ID
+	ChannelD int    `json:"channelId" validate:"required"`  // channel ID
 }
 
 type Channel struct {
+	ID          int       `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"createdAt"`
 	CreatedBy   int       `json:"createdBy"` // user ID
+	ImgLink     string    `json:"imgLink"`
+}
+
+type CreateChannelPayload struct {
+	Name        string    `json:"name" validate:"required,min=1"`
+	Description string    `json:"description"`
+	CreatedBy   int       `json:"createdBy" validate:"required"` // user ID
 	ImgLink     string    `json:"imgLink"`
 }
