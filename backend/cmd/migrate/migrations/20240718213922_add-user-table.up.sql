@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS users (
   `imgLink` VARCHAR(255) NOT NULL,
   `status` INT DEFAULT 1,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `textNotifications` TINYINT DEFAULT FALSE,
+  `emailNotifications` TINYINT DEFAULT FALSE,
   
   PRIMARY KEY (id),
   UNIQUE KEY (username)

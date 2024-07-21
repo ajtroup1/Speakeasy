@@ -2,6 +2,7 @@
 Speakeasy is a web app similar to Discord where users can join their friends in channels to send messages.
 
 ## API Documentation
+*****ABOUT MAKEFILE
 The Speakeasy API uses Go Gorilla Mux to handle basic functions relating to users, messaging, and managing channels. The documentation is broken into these components accordingly.
 
 The API runs on `http://localhost:8080/api/v1/`, which is defined in `api.go` via a subrouter.

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,35 @@ import (
 	"github.com/ajtroup1/speakeasy/types"
 	"github.com/gorilla/mux"
 )
+
+func logAllUsers(handler *Handler) {
+	req, err := http.NewRequest(http.MethodGet, "/users", nil)
+	if err != nil {
+		log.Fatalf("Failed to create request: %v", err)
+	}
+
+	rr := httptest.NewRecorder()
+	router := mux.NewRouter()
+	router.HandleFunc("/users", handler.handleGetUsers)
+	router.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		log.Printf("Failed to get users, status code: %d", rr.Code)
+		log.Printf("Response body: %s", rr.Body.String())
+		return
+	}
+
+	var users []types.User
+	if err := json.Unmarshal(rr.Body.Bytes(), &users); err != nil {
+		log.Printf("Failed to unmarshal users: %v", err)
+		return
+	}
+
+	log.Println("Users in the database:")
+	for _, user := range users {
+		log.Printf("User: %+v\n", user)
+	}
+}
 
 func TestUser(t *testing.T) {
 	userStore := &mockUserStore{}
@@ -56,6 +86,8 @@ func TestUser(t *testing.T) {
 			Email:       "adamjtroup@gmail.com",
 			PhoneNumber: "256-746-6217",
 			ImgLink:     "https://upload.wikimedia.org/wikipedia/en/thumb/2/29/DS2_by_Future.jpg/220px-DS2_by_Future.jpg",
+			TextNotifications: true,
+			EmailNotifications: true,
 		}
 		marshal, _ := json.Marshal(payload)
 
@@ -77,21 +109,14 @@ func TestUser(t *testing.T) {
 	})
 
 	t.Run("should edit a user", func(t *testing.T) {
-		parsedTime, err := ParseTime("2024-07-20 04:27:55")
-		if err != nil {
-			t.Fatal(err)
-		}
-		payload := types.User{
+		payload := types.EditUserPayload{
 			ID: 1,
 			Username:    "adamjtroup2",
-			Password:    "$2a$10$luQ7PyQR0KQeliaN15Y55uMFFPzdwDW8VhjEPvIWfJUizTN4IGps2",
 			Firstname:   "Adam",
 			Lastname:    "Troup",
 			Email:       "adamjtroup@gmail.com",
 			PhoneNumber: "256-746-6217",
 			ImgLink:     "https://upload.wikimedia.org/wikipedia/en/thumb/2/29/DS2_by_Future.jpg/220px-DS2_by_Future.jpg",
-			Status: 1,
-			CreatedAt: parsedTime,
 		}
 		marshal, _ := json.Marshal(payload)
 
@@ -114,12 +139,12 @@ func TestUser(t *testing.T) {
 
 	t.Run("should friend a user", func(t *testing.T) {
 		payload := types.FriendPayload{
-			SendID: 1,
+			SendID:    1,
 			ReceiveID: 2,
 		}
 		marshal, _ := json.Marshal(payload)
 
-		req, err := http.NewRequest(http.MethodPut, "/friend", bytes.NewBuffer(marshal))
+		req, err := http.NewRequest(http.MethodPost, "/friend", bytes.NewBuffer(marshal))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -133,13 +158,92 @@ func TestUser(t *testing.T) {
 
 		if rr.Code != http.StatusOK {
 			t.Errorf("failed with status code %d, received %d", http.StatusOK, rr.Code)
+			t.Logf("response body: %s", rr.Body.String())
+    	}
+	})
+
+	t.Run("should unfriend a user", func(t *testing.T) {
+		payload := types.FriendPayload{
+			SendID:    1,
+			ReceiveID: 2,
+		}
+		marshal, _ := json.Marshal(payload)
+
+		req, err := http.NewRequest(http.MethodPost, "/unfriend", bytes.NewBuffer(marshal))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		router := mux.NewRouter()
+
+		router.HandleFunc("/unfriend", handler.handleFriend)
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusOK {
+			t.Errorf("failed with status code %d, received %d", http.StatusOK, rr.Code)
+			t.Logf("response body: %s", rr.Body.String())
 		}
 	})
 
+	t.Run("should block a user", func(t *testing.T) {
+		payload := types.FriendPayload{
+			SendID:    1,
+			ReceiveID: 3,
+		}
+		marshal, _ := json.Marshal(payload)
+
+		req, err := http.NewRequest(http.MethodPost, "/block", bytes.NewBuffer(marshal))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		router := mux.NewRouter()
+
+		router.HandleFunc("/block", handler.handleFriend)
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusOK {
+			t.Errorf("failed with status code %d, received %d", http.StatusOK, rr.Code)
+			t.Logf("response body: %s", rr.Body.String())
+    	}
+	})
+
+	t.Run("should unblock a user", func(t *testing.T) {
+		payload := types.FriendPayload{
+			SendID:    1,
+			ReceiveID: 3,
+		}
+		marshal, _ := json.Marshal(payload)
+
+		req, err := http.NewRequest(http.MethodPost, "/unblock", bytes.NewBuffer(marshal))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		router := mux.NewRouter()
+
+		router.HandleFunc("/unblock", handler.handleFriend)
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusOK {
+			t.Errorf("failed with status code %d, received %d", http.StatusOK, rr.Code)
+			t.Logf("response body: %s", rr.Body.String())
+		}
+	})
 }
 
 type mockUserStore struct{}
 type mockFriendStore struct{}
+
+func (s *mockUserStore) GetAllUsers() ([]*types.User, error) {
+	return nil, fmt.Errorf("users not found")
+}
 
 func (s *mockUserStore) GetUserByEmail(email string) (*types.User, error) {
 	return nil, fmt.Errorf("user not found")
@@ -167,8 +271,58 @@ func (s *mockUserStore) GetUserByID(id int) (*types.User, error) {
                 0,                      // nanoseconds
                 time.UTC,               // location
             ),
+			TextNotifications: true,
+			EmailNotifications: true,
         }, nil
-    }
+    } else if id ==2 {
+		return &types.User{
+            ID: 2,
+            Username:    "friend",
+            Password:    "$2a$10$luQ7PyQR0KQeliaN15Y55uMFFPzdwDW8VhjEPvIWfJUizTN4IGps2",
+            Firstname:   "Sample",
+            Lastname:    "Name",
+            Email:       "sample@mail.com",
+            PhoneNumber: "111-222-3333",
+            ImgLink:     "",
+            Status: 1,
+            CreatedAt: time.Date(
+                2024,                   // year
+                time.July,              // month
+                20,                     // day
+                4,                      // hour
+                27,                     // minute
+                55,                     // second
+                0,                      // nanoseconds
+                time.UTC,               // location
+            ),
+			TextNotifications: false,
+			EmailNotifications: false,
+        }, nil
+	} else if id ==3 {
+		return &types.User{
+            ID: 3,
+            Username:    "enemy",
+            Password:    "$2a$10$luQ7PyQR0KQeliaN15Y55uMFFPzdwDW8VhjEPvIWfJUizTN4IGps2",
+            Firstname:   "Sample",
+            Lastname:    "Name",
+            Email:       "sample2@mail.com",
+            PhoneNumber: "111-222-3333",
+            ImgLink:     "",
+            Status: 1,
+            CreatedAt: time.Date(
+                2024,                   // year
+                time.July,              // month
+                20,                     // day
+                4,                      // hour
+                27,                     // minute
+                55,                     // second
+                0,                      // nanoseconds
+                time.UTC,               // location
+            ),
+			TextNotifications: false,
+			EmailNotifications: false,
+        }, nil
+	}
     return nil, fmt.Errorf("user not found")
 }
 
@@ -188,6 +342,14 @@ func (s *mockFriendStore) FriendUser(sendID, receiveID uint) error {
 
 func (s *mockFriendStore) UnfriendUser(sendID, receiveID uint) error {
 	return nil
+}
+
+func (s *mockFriendStore) Refriend(sendID, receiveID uint) error {
+	return nil
+}
+
+func (s *mockFriendStore) GetFriendshipByIDs(sendID, receiveID uint) (bool, error) {
+	return false, nil
 }
 
 // Correct usage of time.Date

@@ -98,6 +98,10 @@ func (s *mockMessageStore) CreateMessage(message types.Message) error {
 // Mock implementation for UserStore
 type mockUserStore struct{}
 
+func (s *mockUserStore) GetAllUsers() ([]*types.User, error) {
+	return nil, fmt.Errorf("users not found")
+}
+
 func (s *mockUserStore) GetUserByEmail(email string) (*types.User, error) {
 	return nil, fmt.Errorf("user not found")
 }

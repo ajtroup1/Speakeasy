@@ -15,9 +15,12 @@ type User struct {
 	ImgLink     string    `json:"imglink"`
 	Status      int       `json:"status"`
 	CreatedAt   time.Time `json:"createdAt"`
+	TextNotifications bool `json:"textNotifications"`
+	EmailNotifications bool `json:"emailNotifications"`
 }
 
 type UserStore interface {
+	GetAllUsers() ([]*User, error)
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(id int) (*User, error)
 	CreateUser(User) error
@@ -26,7 +29,16 @@ type UserStore interface {
 
 type FriendStore interface {
 	FriendUser(sendID, receiveID uint) error
-	UnfriendUser (sendID, receiveID uint) error
+	UnfriendUser(sendID, receiveID uint) error
+	Refriend(sendID, receiveID uint) error
+	GetFriendshipByIDs(sendID, receiveID uint) (bool, error)
+}
+
+type BlockStore interface {
+	BlockUser(sendID, receiveID uint) error
+	UnblockUser(sendID, receiveID uint) error
+	Reblock(sendID, receiveID uint) error
+	GetBlockByIDs(sendID, receiveID uint) (bool, error)
 }
 
 type MessageStore interface {
@@ -46,11 +58,23 @@ type RegisterUserPayload struct {
 	Email       string `json:"email" validate:"required,email"`
 	PhoneNumber string `json:"phonenum"`
 	ImgLink     string `json:"imglink"`
+	TextNotifications bool `json:"textNotifications"`
+	EmailNotifications bool `json:"emailNotifications"`
 }
 
 type LoginUserPayload struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
+}
+
+type EditUserPayload struct {
+	ID int
+	Username string
+	Firstname string
+	Lastname string
+	Email string
+	PhoneNumber string
+	ImgLink string
 }
 
 type FriendPayload struct {
