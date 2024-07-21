@@ -37,7 +37,6 @@ type FriendStore interface {
 type BlockStore interface {
 	BlockUser(sendID, receiveID uint) error
 	UnblockUser(sendID, receiveID uint) error
-	Reblock(sendID, receiveID uint) error
 	GetBlockByIDs(sendID, receiveID uint) (bool, error)
 }
 

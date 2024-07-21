@@ -46,7 +46,8 @@ func logAllUsers(handler *Handler) {
 func TestUser(t *testing.T) {
 	userStore := &mockUserStore{}
 	friendStore := &mockFriendStore{}
-	handler := NewHandler(userStore, friendStore)
+	blockStore := &mockBlockStore{}
+	handler := NewHandler(userStore, friendStore, blockStore)
 
 	t.Run("should fail if user payload is invalid", func(t *testing.T) {
 		payload := types.RegisterUserPayload{
@@ -240,6 +241,7 @@ func TestUser(t *testing.T) {
 
 type mockUserStore struct{}
 type mockFriendStore struct{}
+type mockBlockStore struct{}
 
 func (s *mockUserStore) GetAllUsers() ([]*types.User, error) {
 	return nil, fmt.Errorf("users not found")
@@ -349,6 +351,18 @@ func (s *mockFriendStore) Refriend(sendID, receiveID uint) error {
 }
 
 func (s *mockFriendStore) GetFriendshipByIDs(sendID, receiveID uint) (bool, error) {
+	return false, nil
+}
+
+func (s *mockBlockStore) BlockUser(sendID, receiveID uint) error {
+	return nil
+}
+
+func (s *mockBlockStore) UnblockUser(sendID, receiveID uint) error {
+	return nil
+}
+
+func (s *mockBlockStore) GetBlockByIDs(sendID, receiveID uint) (bool, error) {
 	return false, nil
 }
 

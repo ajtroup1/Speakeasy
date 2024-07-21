@@ -14,7 +14,7 @@ func NewStore(db *sql.DB) *Store {
 }
 
 func (s *Store) GetBlockByIDs(sendID, receiveID uint) (bool, error) {
-    query := "SELECT COUNT(*) FROM blocks WHERE sendingID = ? AND receivingID = ?"
+    query := "SELECT COUNT(*) FROM blocks WHERE blockingID = ? AND blockedID = ?"
 
     var count int
     err := s.db.QueryRow(query, sendID, receiveID).Scan(&count)
@@ -27,7 +27,7 @@ func (s *Store) GetBlockByIDs(sendID, receiveID uint) (bool, error) {
 }
 
 func (s *Store) BlockUser(sendID, receiveID uint) error {
-    _, err := s.db.Exec("INSERT INTO blocks (sendingID, receivingID, status) VALUES (?, ?, ?)", sendID, receiveID, 1)
+    _, err := s.db.Exec("INSERT INTO blocks (blockingID, blockedID) VALUES (?, ?)", sendID, receiveID)
     if err != nil {
         return fmt.Errorf("failed to block user: %w", err)
     }
@@ -35,17 +35,9 @@ func (s *Store) BlockUser(sendID, receiveID uint) error {
 }
 
 func (s *Store) UnblockUser(sendID, receiveID uint) error {
-    _, err := s.db.Exec("UPDATE blocks SET status = ? WHERE sendingID = ? AND receivingID = ?", 0, sendID, receiveID)
+    _, err := s.db.Exec("DELETE FROM blocks WHERE blockingID = ? AND blockedID = ?", sendID, receiveID)
     if err != nil {
         return fmt.Errorf("failed to unblock user: %w", err)
-    }
-    return nil
-}
-
-func (s *Store) Reblock(sendID, receiveID uint) error {
-    _, err := s.db.Exec("UPDATE blocks SET status = ? WHERE sendingID = ? AND receivingID = ?", 1, sendID, receiveID)
-    if err != nil {
-        return fmt.Errorf("failed to block user: %w", err)
     }
     return nil
 }

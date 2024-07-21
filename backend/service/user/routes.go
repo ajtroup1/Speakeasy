@@ -21,8 +21,8 @@ type Handler struct {
 	blockStore types.BlockStore
 }
 
-func NewHandler(store types.UserStore, friendStore types.FriendStore) *Handler {
-	return &Handler{store: store, friendStore: friendStore}
+func NewHandler(store types.UserStore, friendStore types.FriendStore, blockStore types.BlockStore) *Handler {
+	return &Handler{store: store, friendStore: friendStore, blockStore: blockStore}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
@@ -304,64 +304,26 @@ func (h *Handler) handleUnfriend(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, nil)
 }
 
-/////////////////////////////
-
 func (h *Handler) handleBlock(w http.ResponseWriter, r *http.Request) {
-	var payload types.FriendPayload
-	if err := utils.ParseJSON(r, &payload); err != nil {
-		log.Printf("Failed to parse JSON: %v", err)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("failed to parse JSON: %w", err))
-		return
-	}
+    var payload types.FriendPayload
 
-	if err := utils.Validate.Struct(payload); err != nil {
-		errors := err.(validator.ValidationErrors)
-		log.Printf("Invalid payload: %v", errors)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
-		return
-	}
+    // Parse the JSON payload
+    if err := utils.ParseJSON(r, &payload); err != nil {
+        utils.WriteError(w, http.StatusBadRequest, err)
+        return
+    }
 
-	_, err := h.store.GetUserByID(int(payload.SendID))
-	if err != nil {
-		log.Printf("User with id %d doesn't exist: %v", payload.SendID, err)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.SendID))
-		return
-	}
+    // Block the user
+    err := h.blockStore.BlockUser(payload.SendID, payload.ReceiveID)
+    if err != nil {
+        log.Printf("Failed to block user: %v", err)
+        utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to block user: %w", err))
+        return
+    }
 
-	_, err = h.store.GetUserByID(int(payload.ReceiveID))
-	if err != nil {
-		log.Printf("User with id %d doesn't exist: %v", payload.ReceiveID, err)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.ReceiveID))
-		return
-	}
-
-	//does a block exist? if so, just change the status
-	found, err := h.blockStore.GetBlockByIDs(payload.SendID, payload.ReceiveID)
-	if err != nil {
-		log.Printf("Failed to block user: %v", err)
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to block user: %w", err))
-		return
-	}
-	if found {
-		err := h.blockStore.Reblock(payload.SendID, payload.ReceiveID)
-		if err != nil {
-			log.Printf("Failed to block user: %v", err)
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to block user: %w", err))
-		return
-		}
-		utils.WriteJSON(w, http.StatusOK, nil)
-		return
-	}
-
-	err = h.blockStore.BlockUser(payload.SendID, payload.ReceiveID)
-	if err != nil {
-		log.Printf("Failed to block user: %v", err)
-		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to block user: %w", err))
-		return
-	}
-
-	utils.WriteJSON(w, http.StatusOK, nil)
+    utils.WriteJSON(w, http.StatusOK, nil)
 }
+
 
 
 func (h *Handler) handleUnblock(w http.ResponseWriter, r *http.Request) {

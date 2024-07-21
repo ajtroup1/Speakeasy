@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ajtroup1/speakeasy/service/block"
 	"github.com/ajtroup1/speakeasy/service/channel"
 	"github.com/ajtroup1/speakeasy/service/friend"
 	"github.com/ajtroup1/speakeasy/service/message"
@@ -32,9 +33,10 @@ func (s *APIServer) Run() error {
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
 
 	friendStore := friend.NewStore(s.db)
+	blockStore := block.NewStore(s.db)
 
 	userStore := user.NewStore(s.db)
-	userHandler := user.NewHandler(userStore, friendStore)
+	userHandler := user.NewHandler(userStore, friendStore, blockStore)
 	userHandler.RegisterRoutes(subrouter)
 
 	channelStore := channel.NewStore(s.db)
