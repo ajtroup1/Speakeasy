@@ -135,3 +135,75 @@ User functionality contains the ability to:
 ` 
 
 # Channels
+
+- Return all channels
+    - Endpoint: `/channels`
+    - Method: GET
+    - Expects no payload
+    - Returns a 200 on successful execution
+
+- Return user by id
+    - Endpoint: `/channels/{id}`
+    - Method: GET
+    - Expects no payload (just query params)
+    - Returns a 200 on successful execution
+
+- Create channel 
+    - Endpoint: `/createchannel`
+    - Method: POST
+    - Expects a payload:
+        ```go
+        type CreateChannelPayload struct {
+            Name        string `json:"name" validate:"required,min=1"`
+            Description string `json:"description"`
+            CreatedBy   int    `json:"createdBy" validate:"required"` // user ID
+            ImgLink     string `json:"imgLink"`
+        }
+        ```
+    - Returns a 201 on successful execution
+
+- Edit user information 
+    - Endpoint: `/editchannel`
+    - Method: PUT
+    - Expects a payload:
+        ```go
+        type EditChannelPayload struct {
+            Name        string    `json:"name"`
+            Description string    `json:"description"`
+            ImgLink     string    `json:"imgLink"`
+        }
+        ```
+    - Returns a 200 on successful execution
+
+- Toggle channel private
+    - Endpoint: `/privatechanneltoggle`
+    - Method: POST
+    - Expects a payload:
+        ```go
+        type ToggleChannelPrivatePayload struct {
+            ChannelD uint `json:"channelD" validate:"required"`
+            UserID uint `json:"userID" validate:"required"`
+        }
+        ```
+    - Returns a 200 on successful execution
+
+# Messages
+
+- Return messages by channel id
+    - Endpoint: `/messages/{channelID}`
+    - Method: GET
+    - Expects no payload (just query params)
+    - Returns a 200 on successful execution
+
+- Create message 
+    - Endpoint: `/createmessage/{channelID}`
+    - Method: POST
+    - Expects a payload:
+        ```go
+        type CreateMessagePayload struct {
+            Content   string `json:"content" validate:"required,min=1"`
+            CreatedBy int    `json:"createdBy" validate:"required"` // user ID
+            ChannelD  int    `json:"channelId" validate:"required"` // channel ID
+        }
+        ```
+    - Returns a 201 on successful execution

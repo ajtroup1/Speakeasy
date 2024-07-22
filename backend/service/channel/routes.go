@@ -63,5 +63,5 @@ func (h *Handler) handleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, c)
+	utils.WriteJSON(w, http.StatusCreated, c)
 }

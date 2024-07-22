@@ -118,3 +118,14 @@ type CreateChannelPayload struct {
 	CreatedBy   int    `json:"createdBy" validate:"required"` // user ID
 	ImgLink     string `json:"imgLink"`
 }
+
+type EditChannelPayload struct {
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	ImgLink     string    `json:"imgLink"`
+}
+
+type ToggleChannelPrivatePayload struct {
+	ChannelD uint `json:"channelD" validate:"required"`
+	UserID uint `json:"userID" validate:"required"`
+}

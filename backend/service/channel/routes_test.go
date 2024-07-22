@@ -65,8 +65,8 @@ func TestChannel(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
-		if rr.Code != http.StatusOK {
-			t.Errorf("failed with status code %d, received %d", http.StatusBadRequest, rr.Code)
+		if rr.Code != http.StatusCreated {
+			t.Errorf("failed with status code %d, received %d", http.StatusCreated, rr.Code)
 		}
 	})
 }
