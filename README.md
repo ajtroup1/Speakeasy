@@ -1,8 +1,8 @@
 ## Speakeasy
-Speakeasy is a web app similar to Discord where users can join their friends in channels to send messages.
+Speakeasy is an example web app similar to Discord where users can join their friends in channels to send messages. This is an API for that app.
 
 ## API Documentation
-When navigated into the Speakeasy folder, cd into backend to run commands from the Makefile. The Makefile contains standard functions like run, test, ..., so reference this for what you can do with it
+*MAKEFILE: When navigated into the Speakeasy folder, cd into backend to run commands from the Makefile. The Makefile contains standard functions like run, test, ..., so reference this for what you can do with it
 ```
 build:
 	@go build -o bin/speakeasy cmd/main.go
@@ -30,7 +30,6 @@ The Speakeasy API uses GO's Gorilla Mux to handle basic functions relating to us
 The API runs on `http://localhost:8080/api/v1/`, which is defined in `api.go` via a subrouter.
 
 # Users
-User functionality contains the ability to:
 
 - Return all users
     - Endpoint: `/users`
@@ -170,11 +169,39 @@ User functionality contains the ability to:
         ```
     - Returns a 200 on successful execution
 
+- Accept a user friend request
+    - Endpoint: `/acceptfriend`
+    - Method: POST
+    - Expects a payload:
+        ```go
+        type FriendPayload struct {
+            SendID    uint `json:"sendID" validate:"required,gt=0"`
+            ReceiveID uint `json:"receiveID" validate:"required,gt=0,nefield=SendID"`
+        }
+        ```
+    - Returns a 200 on successful execution:
+        ```go
+            type User struct {
+                ID                 int       `json:"id"`
+                Username           string    `json:"username"`
+                Password           string    `json:"password"`
+                Firstname          string    `json:"firstname"`
+                Lastname           string    `json:"lastname"`
+                Email              string    `json:"email"`
+                PhoneNumber        string    `json:"phonenum"`
+                ImgLink            string    `json:"imglink"`
+                Status             int       `json:"status"`
+                CreatedAt          time.Time `json:"createdAt"`
+                TextNotifications  bool      `json:"textNotifications"`
+                EmailNotifications bool      `json:"emailNotifications"`
+            }
+            ```
+
 - Get a user's friends by user ID
     - Endpoint: `/friends/{userID}`
     - Method: GET
     - Expects no payload (just query params) 
-    - Returns a 200 on successful execution
+    - Returns a 200 and User objects on successful execution
 
   
 - Block / unblock a user 

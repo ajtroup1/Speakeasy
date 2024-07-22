@@ -33,6 +33,8 @@ type FriendStore interface {
 	UnfriendUser(sendID, receiveID uint) error
 	Refriend(sendID, receiveID uint) error
 	GetFriendshipByIDs(sendID, receiveID uint) (bool, error)
+	GetFriendshipsByID(userID uint) ([]*User, error)
+	Accept(sendID, receiveID uint) error
 }
 
 type BlockStore interface {
@@ -78,7 +80,7 @@ type EditUserPayload struct {
 }
 
 type DeactivateAccountPayload struct {
-	UserID uint
+	UserID          uint
 	ConfirmPassword string
 }
 
@@ -125,20 +127,20 @@ type CreateChannelPayload struct {
 }
 
 type EditChannelPayload struct {
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	ImgLink     string    `json:"imgLink"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	ImgLink     string `json:"imgLink"`
 }
 
 type AddChannelMemberPayload struct {
-	UserID uint `json:"userID"`
-	ChannelID uint `json:"channelID"`
+	UserID       uint `json:"userID"`
+	ChannelID    uint `json:"channelID"`
 	AddingUserID uint `json:"addingUserID"`
 }
 
 type ToggleChannelPrivatePayload struct {
 	ChannelD uint `json:"channelD" validate:"required"`
-	UserID uint `json:"userID" validate:"required"`
+	UserID   uint `json:"userID" validate:"required"`
 }
 
 type DeactivateChannelPayload struct {

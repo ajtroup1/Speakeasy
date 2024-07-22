@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 
@@ -257,6 +258,31 @@ func TestUser(t *testing.T) {
 		}
 	})
 
+	t.Run("should accept a friend request from user", func(t *testing.T) {
+		payload := types.FriendPayload{
+			SendID:    1,
+			ReceiveID: 2,
+		}
+		marshal, _ := json.Marshal(payload)
+
+		req, err := http.NewRequest(http.MethodPost, "/acceptfriend", bytes.NewBuffer(marshal))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		router := mux.NewRouter()
+
+		router.HandleFunc("/acceptfriend", handler.handleFriend)
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusOK {
+			t.Errorf("failed with status code %d, received %d", http.StatusOK, rr.Code)
+			t.Logf("response body: %s", rr.Body.String())
+		}
+	})
+
 	t.Run("should unfriend a user", func(t *testing.T) {
 		payload := types.FriendPayload{
 			SendID:    1,
@@ -273,6 +299,26 @@ func TestUser(t *testing.T) {
 		router := mux.NewRouter()
 
 		router.HandleFunc("/unfriend", handler.handleFriend)
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusOK {
+			t.Errorf("failed with status code %d, received %d", http.StatusOK, rr.Code)
+			t.Logf("response body: %s", rr.Body.String())
+		}
+	})
+
+	t.Run("should get friendships by user id", func(t *testing.T) {
+		userID := uint(1)
+		req, err := http.NewRequest(http.MethodGet, "/friendships/"+strconv.Itoa(int(userID)), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		router := mux.NewRouter()
+
+		router.HandleFunc("/friendships/{id}", handler.handleGetFriendshipsByID)
 
 		router.ServeHTTP(rr, req)
 
@@ -438,6 +484,10 @@ func (s *mockFriendStore) FriendUser(sendID, receiveID uint) error {
 	return nil
 }
 
+func (s *mockFriendStore) Accept(sendID, receiveID uint) error {
+	return nil
+}
+
 func (s *mockFriendStore) UnfriendUser(sendID, receiveID uint) error {
 	return nil
 }
@@ -448,6 +498,10 @@ func (s *mockFriendStore) Refriend(sendID, receiveID uint) error {
 
 func (s *mockFriendStore) GetFriendshipByIDs(sendID, receiveID uint) (bool, error) {
 	return false, nil
+}
+
+func (s *mockFriendStore) GetFriendshipsByID(userID uint) ([]*types.User, error) {
+	return nil, nil
 }
 
 func (s *mockBlockStore) BlockUser(sendID, receiveID uint) error {

@@ -33,7 +33,9 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/register", h.handleRegister).Methods("POST")
 	router.HandleFunc("/edit", h.handleEdit).Methods("PUT")
 	router.HandleFunc("/changepassword", h.handleChangePassword).Methods("PUT")
+	router.HandleFunc("/friendships/{id:[0-9]+}", h.handleGetFriendshipsByID).Methods("GET")
 	router.HandleFunc("/friend", h.handleFriend).Methods("POST")
+	router.HandleFunc("/acceptfriend", h.handleAcceptFriend).Methods("POST")
 	router.HandleFunc("/unfriend", h.handleUnfriend).Methods("POST")
 	router.HandleFunc("/block", h.handleBlock).Methods("POST")
 	router.HandleFunc("/unblock", h.handleUnblock).Methods("POST")
@@ -64,6 +66,24 @@ func (h *Handler) handleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, u)
+}
+
+func (h *Handler) handleGetFriendshipsByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+
+	// Convert the ID from string to integer
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user id: %v", err))
+		return
+	}
+	us, err := h.friendStore.GetFriendshipsByID(uint(id))
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+	}
+
+	utils.WriteJSON(w, http.StatusOK, us)
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -298,6 +318,57 @@ func (h *Handler) handleFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, nil)
+}
+
+func (h *Handler) handleAcceptFriend(w http.ResponseWriter, r *http.Request) {
+	var payload types.FriendPayload
+	if err := utils.ParseJSON(r, &payload); err != nil {
+		log.Printf("Failed to parse JSON: %v", err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("failed to parse JSON: %w", err))
+		return
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		errors := err.(validator.ValidationErrors)
+		log.Printf("Invalid payload: %v", errors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
+		return
+	}
+
+	_, err := h.store.GetUserByID(int(payload.SendID))
+	if err != nil {
+		log.Printf("User with id %d doesn't exist: %v", payload.SendID, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.SendID))
+		return
+	}
+
+	_, err = h.store.GetUserByID(int(payload.ReceiveID))
+	if err != nil {
+		log.Printf("User with id %d doesn't exist: %v", payload.ReceiveID, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.ReceiveID))
+		return
+	}
+
+	//does a friendship exist? change the status
+	found, err := h.friendStore.GetFriendshipByIDs(payload.SendID, payload.ReceiveID)
+	if err != nil {
+		log.Printf("Failed to add friend: %v", err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to add friend: %w", err))
+		return
+	}
+	if found {
+		err := h.friendStore.Accept(payload.SendID, payload.ReceiveID)
+		if err != nil {
+			log.Printf("Failed to add friend: %v", err)
+			utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to add friend: %w", err))
+			return
+		}
+		utils.WriteJSON(w, http.StatusOK, nil)
+		return
+	}
+
+	utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("friendship not found with ids: %d, %d", payload.SendID, payload.ReceiveID))
+	return
 }
 
 func (h *Handler) handleUnfriend(w http.ResponseWriter, r *http.Request) {
