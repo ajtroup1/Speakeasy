@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Speakeasy</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        color: white;
+        position: relative;
+        margin: 20px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        max-width: 600px;
+        background-image: url("https://pixelsharing.wordpress.com/wp-content/uploads/2010/11/gothic-background-tileable-and-seamless-pattern.jpg");
+        background-repeat: repeat;
+        text-align: center;
+      }
+      .header {
+        text-align: center;
+      }
+      .content {
+        margin: 20px 0;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img
+        src="./assets/speakeasy-logo.webp"
+        style="
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 40%;
+          height: auto;
+          z-index: 0;
+          opacity: 0.3;
+        "
+      />
+      <div class="header">
+        <h1>Welcome to Speakeasy, %s!</h1>
+      </div>
+      <div class="content">
+        <p>Thank you for creating an account with Speakeasy!</p>
+        <p>
+          Your account '%s' has just been registered and you're ready to go.
+        </p>
+        <p>
+          Just navigate back to
+          <a href="https://localhost:5173/">Speakeasy</a> to get started.
+        </p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2024 Speakeasy. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>

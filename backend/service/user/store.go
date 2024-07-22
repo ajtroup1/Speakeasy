@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ajtroup1/speakeasy/service/auth"
 	"github.com/ajtroup1/speakeasy/types"
 )
 
@@ -40,7 +41,6 @@ func (s *Store) GetAllUsers() ([]*types.User, error) {
 
 	return users, nil
 }
-
 
 func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	rows, err := s.db.Query("SELECT * FROM users WHERE email = ?", email)
@@ -105,6 +105,47 @@ func (s *Store) EditUser(user types.User) error {
 		user.Username, firstname, lastname, user.Email, user.PhoneNumber, user.ImgLink, user.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update user: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Store) ChangePassword(id uint, currentPassword, newPassword, confirmNewPassword string) error {
+	if newPassword != confirmNewPassword {
+		return fmt.Errorf("new password did not match confirm new password")
+	}
+
+	// Retrieve the user
+	row := s.db.QueryRow("SELECT password FROM users WHERE id = ?", id)
+	var storedPassword string
+	err := row.Scan(&storedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("user not found with id '%d'", id)
+		}
+		return err
+	}
+
+	// Check the current password
+	if !auth.ComparePasswords(storedPassword, []byte(currentPassword)) {
+		return fmt.Errorf("current password did not match")
+	}
+
+	// Check if new password is the same as the current one
+	if auth.ComparePasswords(storedPassword, []byte(newPassword)) {
+		return fmt.Errorf("new password cannot be the same as current password")
+	}
+
+	// Hash the new password
+	hashedPassword, err := auth.HashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("error hashing new password: %v", err)
+	}
+
+	// Update the password in the database
+	_, err = s.db.Exec("UPDATE users SET password = ? WHERE id = ?", hashedPassword, id)
+	if err != nil {
+		return err
 	}
 
 	return nil

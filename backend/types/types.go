@@ -5,18 +5,18 @@ import (
 )
 
 type User struct {
-	ID          int       `json:"id"`
-	Username    string    `json:"username"`
-	Password    string    `json:"password"`
-	Firstname   string    `json:"firstname"`
-	Lastname    string    `json:"lastname"`
-	Email       string    `json:"email"`
-	PhoneNumber string    `json:"phonenum"`
-	ImgLink     string    `json:"imglink"`
-	Status      int       `json:"status"`
-	CreatedAt   time.Time `json:"createdAt"`
-	TextNotifications bool `json:"textNotifications"`
-	EmailNotifications bool `json:"emailNotifications"`
+	ID                 int       `json:"id"`
+	Username           string    `json:"username"`
+	Password           string    `json:"password"`
+	Firstname          string    `json:"firstname"`
+	Lastname           string    `json:"lastname"`
+	Email              string    `json:"email"`
+	PhoneNumber        string    `json:"phonenum"`
+	ImgLink            string    `json:"imglink"`
+	Status             int       `json:"status"`
+	CreatedAt          time.Time `json:"createdAt"`
+	TextNotifications  bool      `json:"textNotifications"`
+	EmailNotifications bool      `json:"emailNotifications"`
 }
 
 type UserStore interface {
@@ -25,6 +25,7 @@ type UserStore interface {
 	GetUserByID(id int) (*User, error)
 	CreateUser(User) error
 	EditUser(User) error
+	ChangePassword(id uint, currentPassword, newPassword, confirmNewPassword string) error
 }
 
 type FriendStore interface {
@@ -50,15 +51,15 @@ type ChannelStore interface {
 }
 
 type RegisterUserPayload struct {
-	Username    string `json:"username" validate:"required,min=4,max=25"`
-	Password    string `json:"password" validate:"required,password"`
-	Firstname   string `json:"firstname" validate:"required,min=2,max=255"`
-	Lastname    string `json:"lastname" validate:"required,min=2,max=255"`
-	Email       string `json:"email" validate:"required,email"`
-	PhoneNumber string `json:"phonenum"`
-	ImgLink     string `json:"imglink"`
-	TextNotifications bool `json:"textNotifications"`
-	EmailNotifications bool `json:"emailNotifications"`
+	Username           string `json:"username" validate:"required,min=4,max=25"`
+	Password           string `json:"password" validate:"required,password"`
+	Firstname          string `json:"firstname" validate:"required,min=2,max=255"`
+	Lastname           string `json:"lastname" validate:"required,min=2,max=255"`
+	Email              string `json:"email" validate:"required,email"`
+	PhoneNumber        string `json:"phonenum"`
+	ImgLink            string `json:"imglink"`
+	TextNotifications  bool   `json:"textNotifications"`
+	EmailNotifications bool   `json:"emailNotifications"`
 }
 
 type LoginUserPayload struct {
@@ -67,18 +68,25 @@ type LoginUserPayload struct {
 }
 
 type EditUserPayload struct {
-	ID int
-	Username string
-	Firstname string
-	Lastname string
-	Email string
+	ID          int
+	Username    string
+	Firstname   string
+	Lastname    string
+	Email       string
 	PhoneNumber string
-	ImgLink string
+	ImgLink     string
+}
+
+type ChangePasswordPayload struct {
+	UserID             uint   `json:"userID" validate:"required"`
+	CurrentPassword    string `json:"currentPassword" validate:"required"`
+	NewPassword        string `json:"newPassword" validate:"required,password"`
+	ConfirmNewPassword string `json:"confirmPassword" validate:"required"`
 }
 
 type FriendPayload struct {
-    SendID    uint `json:"sendID" validate:"required,gt=0"`
-    ReceiveID uint `json:"receiveID" validate:"required,gt=0,nefield=SendID"`
+	SendID    uint `json:"sendID" validate:"required,gt=0"`
+	ReceiveID uint `json:"receiveID" validate:"required,gt=0,nefield=SendID"`
 }
 
 type Message struct {
@@ -92,7 +100,7 @@ type Message struct {
 type CreateMessagePayload struct {
 	Content   string `json:"content" validate:"required,min=1"`
 	CreatedBy int    `json:"createdBy" validate:"required"` // user ID
-	ChannelD int    `json:"channelId" validate:"required"`  // channel ID
+	ChannelD  int    `json:"channelId" validate:"required"` // channel ID
 }
 
 type Channel struct {
@@ -105,8 +113,8 @@ type Channel struct {
 }
 
 type CreateChannelPayload struct {
-	Name        string    `json:"name" validate:"required,min=1"`
-	Description string    `json:"description"`
-	CreatedBy   int       `json:"createdBy" validate:"required"` // user ID
-	ImgLink     string    `json:"imgLink"`
+	Name        string `json:"name" validate:"required,min=1"`
+	Description string `json:"description"`
+	CreatedBy   int    `json:"createdBy" validate:"required"` // user ID
+	ImgLink     string `json:"imgLink"`
 }

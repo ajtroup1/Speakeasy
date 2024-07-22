@@ -9,6 +9,7 @@ import (
 
 	// "github.com/ajtroup1/speakeasy/config"
 	"github.com/ajtroup1/speakeasy/service/auth"
+	"github.com/ajtroup1/speakeasy/service/email"
 	"github.com/ajtroup1/speakeasy/types"
 	"github.com/ajtroup1/speakeasy/utils"
 	"github.com/go-playground/validator/v10"
@@ -16,9 +17,9 @@ import (
 )
 
 type Handler struct {
-	store types.UserStore
+	store       types.UserStore
 	friendStore types.FriendStore
-	blockStore types.BlockStore
+	blockStore  types.BlockStore
 }
 
 func NewHandler(store types.UserStore, friendStore types.FriendStore, blockStore types.BlockStore) *Handler {
@@ -31,6 +32,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/login", h.handleLogin).Methods("POST")
 	router.HandleFunc("/register", h.handleRegister).Methods("POST")
 	router.HandleFunc("/edit", h.handleEdit).Methods("PUT")
+	router.HandleFunc("/changepassword", h.handleChangePassword).Methods("PUT")
 	router.HandleFunc("/friend", h.handleFriend).Methods("POST")
 	router.HandleFunc("/unfriend", h.handleUnfriend).Methods("POST")
 	router.HandleFunc("/block", h.handleBlock).Methods("POST")
@@ -130,16 +132,16 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u := types.User{
-		Username:    payload.Username,
-		Password:    hashedPassword,
-		Firstname:   payload.Firstname,
-		Lastname:    payload.Lastname,
-		Email:       payload.Email,
-		PhoneNumber: payload.PhoneNumber,
-		ImgLink:     payload.ImgLink,
-		Status:      1,
-		CreatedAt:   time.Now(),
-		TextNotifications: payload.TextNotifications,
+		Username:           payload.Username,
+		Password:           hashedPassword,
+		Firstname:          payload.Firstname,
+		Lastname:           payload.Lastname,
+		Email:              payload.Email,
+		PhoneNumber:        payload.PhoneNumber,
+		ImgLink:            payload.ImgLink,
+		Status:             1,
+		CreatedAt:          time.Now(),
+		TextNotifications:  payload.TextNotifications,
 		EmailNotifications: payload.EmailNotifications,
 	}
 
@@ -148,6 +150,14 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
+	}
+
+	if u.EmailNotifications {
+		htmlBody := email.GetRegisterHtmlBody(u.Firstname, u.Username)
+		err = email.SendEmail(u.Email, "Welcome to Speakeasy!", htmlBody)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, u)
@@ -199,6 +209,38 @@ func (h *Handler) handleEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, existingUser)
+}
+
+func (h *Handler) handleChangePassword(w http.ResponseWriter, r *http.Request) {
+	var payload types.ChangePasswordPayload
+	if err := utils.ParseJSON(r, &payload); err != nil {
+		log.Printf("Failed to parse JSON: %v", err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("failed to parse JSON: %w", err))
+		return
+	}
+
+	if err := utils.Validate.Struct(payload); err != nil {
+		errors := err.(validator.ValidationErrors)
+		log.Printf("Invalid payload: %v", errors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
+		return
+	}
+
+	_, err := h.store.GetUserByID(int(payload.UserID))
+	if err != nil {
+		log.Printf("User with id %d doesn't exist: %v", payload.UserID, err)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.UserID))
+		return
+	}
+
+	err = h.store.ChangePassword(uint(payload.UserID), payload.CurrentPassword, payload.NewPassword, payload.ConfirmNewPassword)
+	if err != nil {
+		log.Printf("User with id %d doesn't exist: %v", payload.UserID, err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("error with change password function"))
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, nil)
 }
 
 func (h *Handler) handleFriend(w http.ResponseWriter, r *http.Request) {
@@ -258,7 +300,6 @@ func (h *Handler) handleFriend(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, nil)
 }
 
-
 func (h *Handler) handleUnfriend(w http.ResponseWriter, r *http.Request) {
 	var payload types.FriendPayload
 	if err := utils.ParseJSON(r, &payload); err != nil {
@@ -272,7 +313,6 @@ func (h *Handler) handleUnfriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	_, err := h.store.GetUserByID(int(payload.SendID))
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.SendID))
@@ -283,7 +323,7 @@ func (h *Handler) handleUnfriend(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.ReceiveID))
 		return
 	}
-	
+
 	//are they friends?
 	friends, err := h.friendStore.GetFriendshipByIDs(payload.SendID, payload.ReceiveID)
 	if err != nil {
@@ -305,26 +345,24 @@ func (h *Handler) handleUnfriend(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleBlock(w http.ResponseWriter, r *http.Request) {
-    var payload types.FriendPayload
+	var payload types.FriendPayload
 
-    // Parse the JSON payload
-    if err := utils.ParseJSON(r, &payload); err != nil {
-        utils.WriteError(w, http.StatusBadRequest, err)
-        return
-    }
+	// Parse the JSON payload
+	if err := utils.ParseJSON(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
-    // Block the user
-    err := h.blockStore.BlockUser(payload.SendID, payload.ReceiveID)
-    if err != nil {
-        log.Printf("Failed to block user: %v", err)
-        utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to block user: %w", err))
-        return
-    }
+	// Block the user
+	err := h.blockStore.BlockUser(payload.SendID, payload.ReceiveID)
+	if err != nil {
+		log.Printf("Failed to block user: %v", err)
+		utils.WriteError(w, http.StatusInternalServerError, fmt.Errorf("failed to block user: %w", err))
+		return
+	}
 
-    utils.WriteJSON(w, http.StatusOK, nil)
+	utils.WriteJSON(w, http.StatusOK, nil)
 }
-
-
 
 func (h *Handler) handleUnblock(w http.ResponseWriter, r *http.Request) {
 	var payload types.FriendPayload
@@ -339,7 +377,6 @@ func (h *Handler) handleUnblock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	_, err := h.store.GetUserByID(int(payload.SendID))
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.SendID))
@@ -350,7 +387,7 @@ func (h *Handler) handleUnblock(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with id %d doesn't exist", payload.ReceiveID))
 		return
 	}
-	
+
 	//are they blocked?
 	friends, err := h.blockStore.GetBlockByIDs(payload.SendID, payload.ReceiveID)
 	if err != nil {

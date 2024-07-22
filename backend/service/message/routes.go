@@ -12,7 +12,7 @@ import (
 )
 
 type Handler struct {
-	store types.MessageStore
+	store     types.MessageStore
 	userStore types.UserStore
 }
 
@@ -46,10 +46,10 @@ func (h *Handler) handleCreate(w http.ResponseWriter, r *http.Request) {
 	//ensure channel exists
 
 	m := types.Message{
-		Content:    payload.Content,
-		CreatedBy:    payload.CreatedBy,
-		CreatedAt:   time.Now(),
-		ChannelD: payload.ChannelD,
+		Content:   payload.Content,
+		CreatedBy: payload.CreatedBy,
+		CreatedAt: time.Now(),
+		ChannelD:  payload.ChannelD,
 	}
 
 	err = h.store.CreateMessage(m)

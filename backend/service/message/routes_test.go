@@ -28,9 +28,9 @@ func TestMessage(t *testing.T) {
 
 	t.Run("should fail if message payload is invalid", func(t *testing.T) {
 		payload := types.CreateMessagePayload{
-			Content:    "", // Invalid payload
-			CreatedBy:  1,
-			ChannelD:   1,
+			Content:   "", // Invalid payload
+			CreatedBy: 1,
+			ChannelD:  1,
 		}
 		marshal, err := json.Marshal(payload)
 		if err != nil {
@@ -53,9 +53,9 @@ func TestMessage(t *testing.T) {
 
 	t.Run("should create a message", func(t *testing.T) {
 		payload := types.CreateMessagePayload{
-			Content:    "sample message",
-			CreatedBy:  1,
-			ChannelD:   1,
+			Content:   "sample message",
+			CreatedBy: 1,
+			ChannelD:  1,
 		}
 		marshal, err := json.Marshal(payload)
 		if err != nil {
@@ -129,5 +129,9 @@ func (s *mockUserStore) CreateUser(user types.User) error {
 }
 
 func (s *mockUserStore) EditUser(user types.User) error {
+	return nil
+}
+
+func (s *mockUserStore) ChangePassword(id uint, currentPassword, newPassword, confirmNewPassword string) error {
 	return nil
 }
