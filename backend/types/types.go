@@ -125,6 +125,12 @@ type EditChannelPayload struct {
 	ImgLink     string    `json:"imgLink"`
 }
 
+type AddChannelMemberPayload struct {
+	UserID uint `json:"userID"`
+	ChannelID uint `json:"channelID"`
+	AddingUserID uint `json:"addingUserID"`
+}
+
 type ToggleChannelPrivatePayload struct {
 	ChannelD uint `json:"channelD" validate:"required"`
 	UserID uint `json:"userID" validate:"required"`

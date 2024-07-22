@@ -44,6 +44,12 @@ User functionality contains the ability to:
     - Expects no payload (just query params)
     - Returns a 200 on successful execution
 
+- Search for a user
+    - Endpoint `users/search/{searchParam}`
+    - Method: GET
+    - Expects no payload (just query params) 
+    - Returns a 200 on successful execution
+
 - Register users 
     - Endpoint: `/register`
     - Method: POST
@@ -115,6 +121,13 @@ User functionality contains the ability to:
         }
         ```
     - Returns a 200 on successful execution
+
+- Get a user's friends by user ID
+    - Endpoint: `/friends/{userID}`
+    - Method: GET
+    - Expects no payload (just query params) 
+    - Returns a 200 on successful execution
+
   
 - Block / unblock a user 
     - Endpoint: `/block`, `/unblock`
@@ -127,6 +140,12 @@ User functionality contains the ability to:
         }
         ```
         - Block and friend payload are identical so I use FriendPayload for both
+    - Returns a 200 on successful execution
+
+- Get a user's blocks by user ID
+    - Endpoint: `/blocks/{userID}`
+    - Method: GET
+    - Expects no payload (just query params) 
     - Returns a 200 on successful execution
   
 - Change a user's status depending on recent activity 
@@ -162,7 +181,7 @@ User functionality contains the ability to:
         ```
     - Returns a 201 on successful execution
 
-- Edit user information 
+- Edit channel information 
     - Endpoint: `/editchannel`
     - Method: PUT
     - Expects a payload:
@@ -187,6 +206,35 @@ User functionality contains the ability to:
         ```
     - Returns a 200 on successful execution
 
+- Manage channel members
+    - Endpoint: `/channelmembers/{channelID}`
+    - Methods: `GET`, `POST`, `DELETE`
+    - GET method:
+        - Expects no payload (just query params)
+        - Returns a 200 on successful execution
+    - POST method:
+        - Expects a payload
+        ```go
+        type AddChannelMemberPayload struct {
+            UserID uint `json:"userID"`
+            ChannelID uint `json:"channelID"`
+            AddingUserID uint `json:"addingUserID"`
+        }
+        ```
+        - Returns a 200 on successful execution
+    - DELETE method:
+        - Expects a payload:
+            ```go
+            type AddChannelMemberPayload struct {
+                UserID uint `json:"userID"`
+                ChannelID uint `json:"channelID"`
+                AddingUserID uint `json:"addingUserID"`
+            }
+            ```
+            - Block and friend payload are identical so I use FriendPayload for both
+        - Returns a 200 on successful execution
+
+
 # Messages
 
 - Return messages by channel id
@@ -203,7 +251,7 @@ User functionality contains the ability to:
         type CreateMessagePayload struct {
             Content   string `json:"content" validate:"required,min=1"`
             CreatedBy int    `json:"createdBy" validate:"required"` // user ID
-            ChannelD  int    `json:"channelId" validate:"required"` // channel ID
+            ChannellD  int    `json:"channelId" validate:"required"` // channel ID
         }
         ```
     - Returns a 201 on successful execution
