@@ -25,7 +25,7 @@ migrate-up:
 migrate-down:
 	@go run cmd/migrate/main.go down
 ```
-The Speakeasy API uses Go Gorilla Mux to handle basic functions relating to users, messaging, and managing channels. The documentation is broken into these components accordingly.
+The Speakeasy API uses GO's Gorilla Mux to handle basic functions relating to users, messaging, and managing channels. The documentation is broken into these components accordingly.
 
 The API runs on `http://localhost:8080/api/v1/`, which is defined in `api.go` via a subrouter.
 
@@ -36,19 +36,67 @@ User functionality contains the ability to:
     - Endpoint: `/users`
     - Method: GET
     - Expects no payload
-    - Returns a 200 on successful execution
+    - Returns a 200 and User objects on successful execution:
+        ```go
+        type User struct {
+            ID                 int       `json:"id"`
+            Username           string    `json:"username"`
+            Password           string    `json:"password"`
+            Firstname          string    `json:"firstname"`
+            Lastname           string    `json:"lastname"`
+            Email              string    `json:"email"`
+            PhoneNumber        string    `json:"phonenum"`
+            ImgLink            string    `json:"imglink"`
+            Status             int       `json:"status"`
+            CreatedAt          time.Time `json:"createdAt"`
+            TextNotifications  bool      `json:"textNotifications"`
+            EmailNotifications bool      `json:"emailNotifications"`
+        }
+        ```
 
 - Return user by id
     - Endpoint: `/users/{id}`
     - Method: GET
     - Expects no payload (just query params)
-    - Returns a 200 on successful execution
+    - Returns a 200 and a User object on successful execution:
+        ```go
+        type User struct {
+            ID                 int       `json:"id"`
+            Username           string    `json:"username"`
+            Password           string    `json:"password"`
+            Firstname          string    `json:"firstname"`
+            Lastname           string    `json:"lastname"`
+            Email              string    `json:"email"`
+            PhoneNumber        string    `json:"phonenum"`
+            ImgLink            string    `json:"imglink"`
+            Status             int       `json:"status"`
+            CreatedAt          time.Time `json:"createdAt"`
+            TextNotifications  bool      `json:"textNotifications"`
+            EmailNotifications bool      `json:"emailNotifications"`
+        }
+        ```
 
 - Search for a user
     - Endpoint `users/search/{searchParam}`
     - Method: GET
     - Expects no payload (just query params) 
-    - Returns a 200 on successful execution
+    - Returns a 200 and a User object on successful execution:
+        ```go
+        type User struct {
+            ID                 int       `json:"id"`
+            Username           string    `json:"username"`
+            Password           string    `json:"password"`
+            Firstname          string    `json:"firstname"`
+            Lastname           string    `json:"lastname"`
+            Email              string    `json:"email"`
+            PhoneNumber        string    `json:"phonenum"`
+            ImgLink            string    `json:"imglink"`
+            Status             int       `json:"status"`
+            CreatedAt          time.Time `json:"createdAt"`
+            TextNotifications  bool      `json:"textNotifications"`
+            EmailNotifications bool      `json:"emailNotifications"`
+        }
+        ```
 
 - Register users 
     - Endpoint: `/register`
@@ -151,7 +199,17 @@ User functionality contains the ability to:
 - Change a user's status depending on recent activity 
     - Endpoint: `/___`
 
-` 
+- Deactivate a user's account
+    - Endpoint: `/deactivateaccount`
+    - Method: DELETE
+    - Expects a payload:
+        ```go
+        type DeactivateAccountPayload struct {
+            UserID uint
+            ConfirmPassword string
+        }
+        ```
+    - Returns a 200 on successful execution
 
 # Channels
 
@@ -234,6 +292,17 @@ User functionality contains the ability to:
             - Block and friend payload are identical so I use FriendPayload for both
         - Returns a 200 on successful execution
 
+- Deactivate a channel
+    - Endpoint: `/deactivatechannel`
+    - Method: DELETE
+    - Expects a payload:
+        ```go
+        type DeactivateChannelPayload struct {
+            UserID uint
+        }
+        ```
+    - Returns a 200 on successful execution
+
 
 # Messages
 
@@ -255,3 +324,15 @@ User functionality contains the ability to:
         }
         ```
     - Returns a 201 on successful execution
+
+- Delete a message
+    - Endpoint: `/deletemessage`
+    - Method: DELETE
+    - Expects a payload:
+        ```go
+        type DeleteMessagePayload struct {
+            UserID uint
+            MessageID uint
+        }
+        ```
+    - Returns a 200 on successful execution

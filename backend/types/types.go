@@ -77,6 +77,11 @@ type EditUserPayload struct {
 	ImgLink     string
 }
 
+type DeactivateAccountPayload struct {
+	UserID uint
+	ConfirmPassword string
+}
+
 type ChangePasswordPayload struct {
 	UserID             uint   `json:"userID" validate:"required"`
 	CurrentPassword    string `json:"currentPassword" validate:"required"`
@@ -134,4 +139,8 @@ type AddChannelMemberPayload struct {
 type ToggleChannelPrivatePayload struct {
 	ChannelD uint `json:"channelD" validate:"required"`
 	UserID uint `json:"userID" validate:"required"`
+}
+
+type DeactivateChannelPayload struct {
+	UserID uint
 }
